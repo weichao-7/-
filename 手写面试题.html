@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<style>
+		.anmation{
+			width: 100px;
+			height: 100px;
+			animation: run 1s linear forwards;
+			background: #000;
+/* 			animation-iteration-count: 1; */
+
+		}
+		@keyframes run {
+			0%{
+				transform: translateX(0);
+			}
+			100%{
+				transform: translateX(-100px);
+			}
+		}
+		.flex{
+			width: 1000px;
+			display: flex;
+		}
+		.ddddd{
+			width: 200px;
+		}
+		.item{
+/* 			//flex:1; */
+			background: #841217;
+			flex-grow: 1;
+			flex-basis: 200px;
+		}
+		.i2{
+			flex-grow: 2;
+		}
+	</style>
+	<body>
+		<div class="anmation"></div>
+		<div class="flex">
+			<div class="ddddd">2222211232131</div>
+			<div class="item">111</div>
+			<div class="i2">222</div>
+		</div>
+	</body>
+	<script>
+	   //vue响应式
+	   let obj = {
+		   name:'weiwei'
+	   }
+	   const setMyName = function(){
+		   let el = document.querySelector('#name')
+		   if(el){
+			   el.innerHTML = obj.name
+		   }else{
+			   el = document.createElement('div')
+			   el.id = 'name'
+			   el.innerHTML = obj.name
+			   document.body.appendChild(el)
+		   }
+	   }
+	   const autoRun = function(fn){
+		   window.__fn = fn
+		   fn()
+		   window.__fn = null
+	   }
+	   const obsever = function(obj){
+		   Object.keys(obj).forEach(key=>{
+			   let proy = obj[key]
+			   let arr = []
+			   Object.defineProperty(obj,key,{
+				   get(){
+					   if(!arr.includes(window.__fn)){
+						   arr.push(window.__fn)
+					   }
+					   return proy
+				   },
+				   set(v){
+					   proy = v
+					   arr.forEach(item=>{
+						   item()
+					   })
+					   
+				   }
+			   })
+		   })
+	   }
+	   obsever(obj)
+	   autoRun(setMyName)
+	   
+	   //防抖
+	   const decone = function(fn,timing){
+		   let timer = null
+		   return function(){
+			   if(timer){
+				   clearTimeout(timer)
+			   }
+			   timer = setTimeout(()=>{
+				   fn()
+			   },timing)
+		   }
+	   }
+	   const fn = function(){
+		   let el = document.createElement('div')
+		   el.innerHTML = '防抖了/节流了'
+		   document.body.appendChild(el)
+	   }
+	  // window.onresize = decone(fn,1000)
+	  
+	  //节流
+	  const throle = function(fn,timing){
+		  let isWait = false
+		  return function(){
+			  if(!isWait){
+				  isWait = true
+				  fn()
+				  setTimeout(()=>{
+					  isWait = false
+				  },timing)
+			  }
+		  }
+	  }
+	  // window.onresize = throle(fn,2000)
+	  //完美继承
+	  function sourse(color){
+		  this.color = color
+	  }
+	  sourse.prototype.name = 'pp'
+	  function targets(weight,color){
+		  sourse.call(this,color)
+		  this.weight = weight
+	  }
+	  function extend(sourse,targets){
+		  const F= function(){}
+		  F.prototype = sourse.prototype
+		  targets.prototype = new F()
+		  targets.prototype.constructor = targets
+	  }
+	extend(sourse,targets,'red')
+	const newt = new targets('200kg','red')
+	//console.log(newt.weight,newt.color,newt.name)
+	
+	//数组去重
+	const setArr =function(arr){
+		let newArr = []
+		arr =Array.isArray(arr)?arr:[],
+		arr.forEach(item=>{
+			if(!newArr.includes(item)){
+				newArr.push(item)
+			}
+		})
+		
+		//newArr = [...new Set(arr)]
+		return newArr
+	}
+	//console.log(setArr([1,1,1,2,3,4,4,5,5,6]))
+	
+	//深拷贝
+	const deepClone = function(obj){
+		let newObj = Array.isArray(obj)?[]:{};
+		if(obj){
+			for(let key in obj){
+				if(obj[key] && typeof obj[key] ==='object'){
+					if(obj.hasOwnProperty(key)){
+						newObj[key] = deepClone(obj[key])
+					}
+				}else{
+					newObj[key] = obj[key]
+				}
+			}
+		}
+		return newObj
+	}
+	const copyObj = deepClone({
+		'1':'ccc',
+		name:'mayt',
+		ae:{
+			da:['ccc'],
+			cd:'1123'
+		},
+		fn:function(){},
+		acxdss:22
+	})
+	//console.log(copyObj)
+	
+	
+	//函数科里化
+	const add =function(){
+		let arr = [...arguments]
+		const _add = function(){
+			if(arguments.length ===0){
+				return arr.reduce((a,b)=>{
+					return a+b
+				})
+			}else{
+				arr.push(...arguments)
+				return _add
+			}
+		}
+		return _add
+	}
+	//console.log(add(1,2,3)(4)())
+	
+	//参数归一化
+	function dateFormat(date,str,isZero){
+		if(typeof str ==='function'){
+			return str(date,isZero)
+		}
+		if(str === 'date'){
+			str = 'YYYY-MM-DD'
+		}
+		if(str === 'datetime'){
+			str = 'YYYY-MM-DD hh:mm:ss'
+		}
+		const dealDate = function(date){
+			const obj= {
+				Y:new Date(date).getFullYear(),
+				M:new Date(date).getMonth()+1,
+				D:new Date(date).getDate(),
+				h:new Date(date).getHours(),
+				m:new Date(date).getMinutes(),
+				s:new Date(date).getSeconds(),
+			}
+			return obj
+		}
+		const dealTime= function(str){
+			const {Y,M,D,h,m,s} = dealDate(date)
+			str = str.replace('YYYY',Y)
+			str = str.replace('MM',isZero&&M<10?('0'+M):M)
+			str = str.replace('DD',isZero&&D<10?('0'+D):D)
+			str = str.replace('hh',isZero&&h<10?('0'+h):h)
+			str = str.replace('mm',isZero&&m<10?('0'+m):m)
+			str = str.replace('ss',isZero&&s<10?('0'+s):s)
+			return str
+		}
+		return dealTime(str)
+	}
+	// console.log(dateFormat(1690001500,function(date,isZero){
+	// 	return '1690001500'
+	// },false))
+	// function (fn){
+	// 	return fn
+	// }
+	
+	//多维数组变一位数组
+	const arrToArr =function(arr){
+		let newArr =[]
+		arr = Array.isArray(arr)?arr:[];
+		const fn = function(array){
+			array.forEach(item=>{
+				if(Array.isArray(item)){
+					return fn(item)
+				}else{
+					newArr.push(item)
+				}
+			})
+		}
+		fn(arr)
+		
+		return newArr
+	}
+	//console.log(arrToArr([1,2,[1,3,3,[222]]]))
+	//手写bind
+	Function.prototype.myBind = function(ctx,...rest){
+		const fn = this
+		return function bind(...last){
+			if(this instanceof bind){
+				return new fn(...rest,...last)
+			}else{
+				return fn.call(ctx,...rest,...last)
+			}
+		}
+	}
+	function lookBind(a,b,c){
+		console.log(this,a,b,c)
+	}
+	const newBind = lookBind.myBind({a:'ccc'},'1','2')
+	newBind('cccc')
+	new newBind()
+	
+	
+	//首写call
+	Function.prototype.myCall = function(ctx,...rest){
+		ctx = typeof ctx ===null ||typeof ctx ===undefined?window:Object(ctx)
+		const fn = Symbol('fn')
+		ctx[fn] = this
+		ctx[fn](...rest)
+		delete ctx[fn]
+		return ctx
+	}
+	lookBind.myCall({a:'ddd'},'c','d','e')
+	
+	
+	//手写promise
+	const state = 'pending';
+	const succese = 'fullject';
+	const fail = 'reject';
+	function myPromise(fn){
+		this.state = state;
+		this.value = undefined;
+		this.error = undefined;
+		this.succeseCall = []
+		this.failCall = []
+		fn(this.resove.bind(this),this.reject.bind(this))
+	}
+	myPromise.prototype.resove = function(value){
+		if(this.state ===state){
+			this.state = succese
+			this.value = value
+			this.succeseCall.forEach(item=>item(value))
+		}
+	}
+	myPromise.prototype.reject = function(error){
+		if(this.state ===state){
+			this.state = fail
+			this.error = error
+			this.failCall.forEach(item=>item(error))
+		}
+	}
+	myPromise.prototype.then=function(fn,err){
+		if(this.state === succese){
+			fn(this.value)
+		}
+		if(this.state === fail){
+			err(this.error)
+		}
+		if(this.state === state){
+			this.succeseCall.push(fn)
+			this.failCall.push(err)
+		}
+	}
+	// myPromise.prototype.catch=function(fn){
+	// 	fn(this.error)
+	// }
+	const newPro = new myPromise((resove,reject)=>{
+		console.log(1)
+		setTimeout(()=>{
+			reject('1')
+		},3000)
+	})
+	newPro.then(res=>{
+		console.log(res)
+	},error=>{
+		console.log(error)
+	})
+	
+	const objtttt ={
+		a:'1'
+	}
+	Object.defineProperty(Object.prototype,'abc',{
+		get(){
+			return this
+		}
+	})
+	console.log(objtttt['abc'])
+	</script>
+</html>
