@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+  </head>
+  <style>
+    .list {
+      position: relative;
+    }
+
+    .upload {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      background: #fff;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      border: 1px solid #f5f5f5;
+      background: #296cd0;
+      color: #fff;
+      border-radius: 5px;
+
+    }
+
+    .input {
+      opacity: 0;
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      top: 0;
+      z-index: 10;
+      cursor: pointer;
+    }
+  </style>
+  <body>
+    <div class="list">
+      <input class="input" type="file" id="uplode" multiple />
+      <div class="upload">上传图片</div>
+    </div>
+  </body>
+  <script>
+    const uplode = document.querySelector('#uplode');
+    uplode.onchange = (e) => {
+      const files = e.target.files;
+      let formData = new FormData();
+      [...files].forEach((item, index) => {
+        formData.append('upload', files[index])
+      })
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+    }
+  </script>
+</html>
